@@ -1,0 +1,3 @@
+class obstacleInTheWay(Exception):
+    pass
+
