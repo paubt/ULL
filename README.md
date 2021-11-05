@@ -2,7 +2,7 @@
 tareas and experiments at Univerisdad La Laguna
 
 
-#### 1. path search aglorithm
+## 1. path search aglorithm
 
 * folder: aiBusq
 * tasks: 
