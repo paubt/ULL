@@ -8,7 +8,7 @@
 int main() {
     std::cout << "-------------test---MetaParameter--------------" << std::endl;
     MetaParameter testMp(10, 10);
-
+    std::cout << testMp.getHeight();
     std::cout << "-------------test----Board----------------------" << std::endl;
     // time begin
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
