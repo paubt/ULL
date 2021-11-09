@@ -2,7 +2,7 @@
 tareas and experiments at Univerisdad La Laguna
 
 
-## 1. path search aglorithm
+## 1. path search aglorithm in python
 
 * folder: aiBusq
 * tasks: 
@@ -12,4 +12,13 @@ tareas and experiments at Univerisdad La Laguna
     4.  write [infrome](./aiBusq/informev2.pdf)
 * language: python
 
-* __note:__ main source was [Sean Luke, Essentials of Metaheuristics](https://cs.gmu.edu/~sean/book/metaheuristics/Essentials.pdf) *
+* __note:__ main source was [Sean Luke, Essentials of Metaheuristics](https://cs.gmu.edu/~sean/book/metaheuristics/Essentials.pdf)
+
+
+## 2. path search aglorithm in c++
+
+* folder: aiBusqCpp
+* tasks: same as in task 1. but in c++ (out of pure interest :))
+* language: c++
+
+* __note:__ main source was [Sean Luke, Essentials of Metaheuristics](https://cs.gmu.edu/~sean/book/metaheuristics/Essentials.pdf)
