@@ -13,9 +13,8 @@
 class Board: public MetaParameter{
 public:
     float obstacleRatio;
-    bool possibleToSolve;
     // the array is basically a pointer to pointers (list of lists)
-    int **array;
+    int **array{};
 
     Board(MetaParameter &metaParameter, float oRatio);
     Board(int h, int w, int oC, int eC, int tC, float oRatio);
@@ -36,6 +35,12 @@ private:
     //helperFunctions
     //sets the whole board to
     void setWholeBoardTo(int x);
+    // delete/ free up the board
+    void deleteBoard();
+    // allocate / create a the space for the new board
+    void allocateBoard();
+    // fist delete old board then create new and copy the state form other into the new one
+    void copyBoard(const Board &other);
 };
 
 

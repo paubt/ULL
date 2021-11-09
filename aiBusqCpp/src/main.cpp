@@ -7,11 +7,7 @@
 
 int main() {
     std::cout << "-------------test---MetaParameter--------------" << std::endl;
-    MetaParameter testMp(15, 15);
-    MetaParameter test2Mp(10,10);
-    std::cout << testMp.getHeight() << std::endl;
-    testMp = test2Mp;
-    std::cout << testMp.getHeight() << std::endl;
+    MetaParameter testMp(10, 10);
 
     std::cout << "-------------test----Board----------------------" << std::endl;
     // time begin
@@ -23,6 +19,9 @@ int main() {
     testB.printBoard();
     // calculate differance of begin and end and print it
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+
+
+
 
     std::cout << "------------test----EvoAlgo--------------------" << std::endl;
     int mu = 10;

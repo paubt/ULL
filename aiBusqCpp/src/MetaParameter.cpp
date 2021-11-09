@@ -55,6 +55,6 @@ MetaParameter &MetaParameter::operator=(const MetaParameter &other) {
     obstacleCode = other.getObstacleCode();
     emptySpaceCode = other.getEmptySpaceCode();
     taxiCode = other.getTaxiCode();
-    generator.seed(42);
+    generator = other.generator;
     return *this;
 }
