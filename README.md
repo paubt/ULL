@@ -20,5 +20,12 @@ tareas and experiments at Univerisdad La Laguna
 * folder: aiBusqCpp
 * tasks: same as in task 1. but in c++ (out of pure interest :))
 * language: c++
+* __direction codification__
+  * we use 8 directions
+  * diagonal moves are allowed 
+  * | NW = 7 | N = 0| NE = 1 |
+    |------|:-----:|-----:|
+    | W = 6| X | E = 2 |
+    | SW = 5 |  S = 4 | SE = 3 |
 
 * __note:__ main source was [Sean Luke, Essentials of Metaheuristics](https://cs.gmu.edu/~sean/book/metaheuristics/Essentials.pdf)

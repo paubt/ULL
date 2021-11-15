@@ -22,14 +22,12 @@ int main() {
 
 
 
+    std::cout << "----------test----Individuals------------------" << std::endl;
 
+    StringIndividual<10, 14, 1> testIndi;
+    std::cout << testIndi.getMean() << std::endl;
     std::cout << "------------test----EvoAlgo--------------------" << std::endl;
-    int mu = 10;
-    int lambda = 5;
-    int verbose = true;
-    int searchTime = 2;
-    EvoAlgo<stringIndividual> testEvoAlgo(testB, verbose, mu, lambda, searchTime);
-    testEvoAlgo.printBoard();
+
 
     return 0;
 };

@@ -191,7 +191,6 @@ def bitFlipMutation(genotype, chanceBitFlip):
 
 # takes a string an inserts subsequences (of mean and str) while random < chanceInsert
 def insertDeleteMutation(genotype, chanceInsert, chanceDelete, meanInsDel, stdInsDel):
-    newGenotype = list()
     # dictionary of directions to chose
     directionsDictionary = ["N", "S", "W", "E"]
     # go through the insert loop x times

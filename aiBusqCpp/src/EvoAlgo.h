@@ -11,19 +11,46 @@
 #include "Board.h"
 
 
-// struct for the individuals
-struct stringIndividual {
-    // genotype is a string of direction sequence
+template<int Mean, int Std, int Sec>
+class StringIndividual {
     std::string genotype;
-    // phenotype is the fitness of the genotype
-    float phenotype;
-    // fitness function
-    float fitness();
-    // set individual to random sequence
-    void createNewGenotype();
-    // mutation Function
-    stringIndividual mutate();
+    const int mean;
+    const int std;
+    const int sec;
+public:
+    StringIndividual();
+    // creat new individual
+    void creatNewGenotype();
+    // getter function's // note these are const's
+    int getMean() const;
+    int getStd() const;
+    int getSec() const;
 };
+
+template<int Mean, int Std, int Sec>
+StringIndividual<Mean, Std, Sec>::StringIndividual(): mean(Mean), std(Std), sec(Sec){
+    genotype.clear();
+}
+
+template<int Mean, int Std, int Sec>
+int StringIndividual<Mean, Std, Sec>::getMean() const {
+    return mean;
+}
+
+template<int Mean, int Std, int Sec>
+int StringIndividual<Mean, Std, Sec>::getStd() const {
+    return std;
+}
+
+template<int Mean, int Std, int Sec>
+int StringIndividual<Mean, Std, Sec>::getSec() const {
+    return sec;
+}
+
+template<int Mean, int Std, int Sec>
+void StringIndividual<Mean, Std, Sec>::creatNewGenotype() {
+
+}
 
 
 // class template that takes as template parameters a class individual's
@@ -47,8 +74,8 @@ public:
 };
 
 template<class Individual>
-EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int searchTime):
-        Board(board), verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime){
+EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int searchTime): Board(board),
+                             verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime) {
 
 }
 
