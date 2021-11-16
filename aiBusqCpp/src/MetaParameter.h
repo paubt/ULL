@@ -6,6 +6,8 @@
 #define ASTULL_METAPARAMETER_H
 
 #include "random"
+#include <cassert>
+
 
 class MetaParameter {
 public:

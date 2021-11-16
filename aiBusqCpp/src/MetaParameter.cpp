@@ -8,6 +8,9 @@
 MetaParameter::MetaParameter(int h, int w, int oC, int eC, int tC): height(h), width(w),
                             obstacleCode(oC), emptySpaceCode(eC), taxiCode(tC){
     generator.seed(42);
+    // check if height and width are larger than 0
+    assert(h > 0);
+    assert(w > 0);
 }
 
 MetaParameter::MetaParameter(const MetaParameter &metaParameterToCopy) {
@@ -20,10 +23,13 @@ MetaParameter::MetaParameter(const MetaParameter &metaParameterToCopy) {
 }
 
 void MetaParameter::setHeight(int newHeight) {
+    // make sure that height larger 0
+    assert(newHeight > 0);
     height = newHeight;
 }
 
 void MetaParameter::setWidth(int newWidth) {
+    // check if newWidth larger 0
     width = newWidth;
 }
 

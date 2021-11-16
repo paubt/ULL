@@ -23,10 +23,17 @@ int main() {
 
 
     std::cout << "----------test----Individuals------------------" << std::endl;
-
     StringIndividual<10, 14, 1> testIndi;
-    std::cout << testIndi.getMean() << std::endl;
+    std::cout << testIndi.getGenotype() << std::endl;
+    testIndi.setGenotype("1023112312");
+    std::cout << testIndi.getGenotype() << std::endl;
+
     std::cout << "------------test----EvoAlgo--------------------" << std::endl;
+    EvoAlgo<StringIndividual<10, 5, 1>> testAlgo(testB, true, 10, 5, 2);
+
+
+    std::cout << "" << std::endl;
+
 
 
     return 0;
