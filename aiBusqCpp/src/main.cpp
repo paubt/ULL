@@ -10,6 +10,7 @@ int main() {
     MetaParameter testMp(3, 6);
     std::cout << "-------------test----Board----------------------" << std::endl;
     Board testB(testMp, 0.2);
+    std::cout << "lel" << std::endl;
     testB.printBoard();
 
     testB.redistributeObstaclesRandom();

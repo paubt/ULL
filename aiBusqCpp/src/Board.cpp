@@ -92,6 +92,7 @@ void Board::redistributeObstaclesRandom() {
         }
     // until we have added enough
     }while(numberOfObstaclesPresent < numberOfObstaclesWanted);
+    setGoal(height-1, width-1);
 }
 
 // after updating the new value it calls the base case function redistributeObstaclesRandom()
@@ -150,4 +151,15 @@ void Board::allocateBoard() {
     for(int i = 0; i < height; i++) {
         array[i] = new int[width];
     }
+}
+
+void Board::setGoal(int goalHeight, int goalWidth) {
+    // check if coordinates are legit
+    assert(goalHeight < height);
+    assert(goalHeight >= 0);
+    assert(goalWidth < width);
+    assert(goalWidth >= 0);
+    // set the goal in the array
+    array[goalHeight][goalWidth] = 3;
+
 }

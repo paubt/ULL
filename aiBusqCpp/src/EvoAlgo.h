@@ -98,7 +98,7 @@ public:
     // allocates n new Individuals and push's them into the population list doing a random walk for each;
     void createInitialPopulation();
     // determine the walk length and performs a walk returning the encoded sequence as a string (see README for explanation)
-    std::string randomWalk();
+    std::vector<int> randomWalk(bool &found, const int walkLength, const int walkTime);
     //
 };
 
@@ -126,12 +126,16 @@ EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int
 
 template<class Individual>
 void EvoAlgo<Individual>::createInitialPopulation() {
+    // found variable
+    bool found = false;
     //
-    std::string t = randomWalk();
+    std::vector<int> t = randomWalk(found,5,1);
 }
 
 template<class Individual>
-std::string EvoAlgo<Individual>::randomWalk() {
+std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLength, const int walkTime) {
+    // set found variable to false
+    found = false;
     // make a hard copy of the array
     // using the = operator specified in Board; this is allowed cause in place of a Board type a children type(here algo) can take his place
     Board* tempBoard = this;
@@ -140,8 +144,183 @@ std::string EvoAlgo<Individual>::randomWalk() {
     // the walk sequence
     // the current position height und width initialized with zero
     int positionHeight, positionWidth = 0;
+    // direction options
+    std::vector<int> directionOptions;
+    // the walk sequence
+    std::vector<int> walkSequence;
+    // the walk direction choose
+    int nextStepDirection;
+    // calculate the max time it should take
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    return nullptr;
+    std::chrono::steady_clock::time_point
+    while (true) {
+        // clear the directionsOptions
+        directionOptions.clear();
+        // go through each option/direction we could take and
+        // check if goal it's the goal
+            // if so add direction to walk sequence and return the sequence
+        // check if it is free and not already visited
+            // if so add it to possible direction options
+        // south
+        if (positionHeight < tempBoard->height - 1) {
+            // check for goal
+            if (tempBoard->array[positionHeight + 1][positionWidth] == 3) {
+                walkSequence.push_back(4);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight + 1][positionWidth] == 0) {
+                directionOptions.push_back(4);
+            }
+        }
+        // north
+        if (positionHeight > 0) {
+            // check for goal
+            if (tempBoard->array[positionHeight - 1][positionWidth] == 3) {
+                walkSequence.push_back(0);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight - 1][positionWidth] == 0) {
+                directionOptions.push_back(0);
+            }
+        }
+        // east
+        if (positionWidth < tempBoard->width - 1) {
+            // check for goal
+            if (tempBoard->array[positionHeight][positionWidth + 1] == 3) {
+                walkSequence.push_back(2);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight][positionWidth + 1] == 0) {
+                directionOptions.push_back(2);
+            }
+        }
+        // west
+        if (positionWidth > 0) {
+            // check for goal
+            if (tempBoard->array[positionHeight][positionWidth - 1] == 3) {
+                walkSequence.push_back(6);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight][positionWidth - 1] == 0) {
+                directionOptions.push_back(6);
+            }
+        }
+        // northwest
+        if ((positionWidth > 0) && (positionHeight >0)){
+            // check for goal
+            if (tempBoard->array[positionHeight - 1][positionWidth - 1] == 3) {
+                walkSequence.push_back(7);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight - 1][positionWidth - 1] == 0) {
+                directionOptions.push_back(7);
+            }
+        }
+        // northeast
+        if ((positionWidth < tempBoard->width - 1) && (positionHeight > 0)){
+            // check for goal
+            if (tempBoard->array[positionHeight - 1][positionWidth + 1] == 3) {
+                walkSequence.push_back(1);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight - 1][positionWidth + 1] == 0) {
+                directionOptions.push_back(1);
+            }
+
+        }
+        // southwest
+        if ((positionWidth > 0) && (positionHeight < tempBoard->height - 1)){
+            // check for goal
+            if (tempBoard->array[positionHeight + 1][positionWidth - 1] == 3) {
+                walkSequence.push_back(5);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight + 1][positionWidth - 1] == 0) {
+                directionOptions.push_back(5);
+            }
+        }
+        // southeast
+        if ((positionWidth < tempBoard->width - 1) && (positionHeight < tempBoard->height - 1)){
+            // check for goal
+            if (tempBoard->array[positionHeight + 1][positionWidth + 1] == 3) {
+                walkSequence.push_back(3);
+                found = true;
+                return walkSequence;
+            }
+            // check if it is free
+            if (tempBoard->array[positionHeight + 1][positionWidth + 1] == 0) {
+                directionOptions.push_back(3);
+            }
+        }
+        // if there are no options available the search terminates and returns with false
+        if (directionOptions.empty()){
+            found = false;
+            return walkSequence;
+        }
+        // choose a random directions from the directions vector
+        nextStepDirection = directionOptions[rand() % directionOptions.size()];
+        // append the step direction to the walk sequence
+        walkSequence.push_back(nextStepDirection);
+        // mark the current place as visited by overwriting the position with 5
+        tempBoard->array[positionHeight][positionWidth] = visitedPosition;
+        // update the current position
+        switch (nextStepDirection) {
+            case 0:
+                --positionHeight;
+                break;
+            case 1:
+                --positionHeight;
+                ++positionWidth;
+                break;
+            case 2:
+                ++positionWidth;
+                break;
+            case 3:
+                ++positionHeight;
+                ++positionWidth;
+                break;
+            case 4:
+                ++positionHeight;
+                break;
+            case 5:
+                ++positionHeight;
+                --positionWidth;
+                break;
+            case 6:
+                --positionWidth;
+                break;
+            case 7:
+                --positionHeight;
+                --positionWidth;
+                break;
+            // if we have another value we messed up somewhere
+            default:
+                std::cout << "logic error" << nextStepDirection << std::endl;
+                found = false;
+                return walkSequence;
+        }
+        // if the sequence reached the limit length given as input parameters it terminates the search
+        if (walkLength == walkSequence.size()) {
+            break;
+        }
+
+    }
+    return walkSequence;
 }
 
 

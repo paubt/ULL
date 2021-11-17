@@ -41,6 +41,8 @@ private:
     void allocateBoard();
     // fist delete old board then create new and copy the state form other into the new one
     void copyBoard(const Board &other);
+    // setsGaol
+    void setGoal(int goalHeight, int goalWidth);
 };
 
 
