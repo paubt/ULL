@@ -6,10 +6,16 @@
 #include "EvoAlgo.h"
 
 int main() {
+    std::cout << "-------------test----MetaParameter--------------" << std::endl;
+    MetaParameter testMp(10, 10);
+    std::cout << "-------------test----Board----------------------" << std::endl;
+    Board testB(testMp, 0.2);
+    /*
     std::cout << "-------------test---MetaParameter--------------" << std::endl;
     MetaParameter testMp(10, 10);
     std::cout << testMp.getHeight();
     std::cout << "-------------test----Board----------------------" << std::endl;
+
     // time begin
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     Board testB(testMp, 0.2);
@@ -19,20 +25,14 @@ int main() {
     testB.printBoard();
     // calculate differance of begin and end and print it
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
-
-
-
-    std::cout << "----------test----Individuals------------------" << std::endl;
+    */
+    std::cout << "-------------test----Individuals----------------" << std::endl;
     StringIndividual<10, 14, 1> testIndi;
-    std::cout << testIndi.getGenotype() << std::endl;
-    testIndi.setGenotype("1023112312");
-    std::cout << testIndi.getGenotype() << std::endl;
 
-    std::cout << "------------test----EvoAlgo--------------------" << std::endl;
+    std::cout << "-------------test----EvoAlgo--------------------" << std::endl;
     EvoAlgo<StringIndividual<10, 5, 1>> testAlgo(testB, true, 10, 5, 2);
 
 
-    std::cout << "" << std::endl;
 
 
 

@@ -79,7 +79,7 @@ template <class Individual>
 class EvoAlgo: public Board{
 public:
     // the population is a list with elements of the type individuals
-    std::list<Individual> population;
+    std::list<Individual*> Population;
     // mu is the population size
     const int mu;
     // lambda is the parent size
@@ -95,18 +95,52 @@ public:
     EvoAlgo(Board &board, bool verbose,int mu, int lambda,
               // the time the algorithm will search
               int searchTime);
+    // allocates n new Individuals and push's them into the population list doing a random walk for each;
+    void createInitialPopulation();
+    // determine the walk length and performs a walk returning the encoded sequence as a string (see README for explanation)
+    std::string randomWalk();
+    //
 };
 
 template<class Individual>
 EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int searchTime): Board(board),
                              verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime) {
-    Individual  pTestIndividual;
-    population.push_back(pTestIndividual);
+    /*
+    Individual* pTempIndividual = new Individual;
 
-    for(class std::list<Individual>::iterator it= population.begin(); it != population.end(); it++)
-        std::cout << it->getMean();
+    Population.push_back(pTempIndividual);
 
+    for(auto it = Population.begin(); it != Population.end(); it++)
+        std::cout << (*it)->getMean() << std::endl;
+
+    Individual* pTemp = nullptr;
+
+    pTemp = Population.back();
+
+    std::cout << pTemp->getMean();
+    */
+
+    createInitialPopulation();
 }
+
+
+template<class Individual>
+void EvoAlgo<Individual>::createInitialPopulation() {
+    //
+    std::string t = randomWalk();
+}
+
+template<class Individual>
+std::string EvoAlgo<Individual>::randomWalk() {
+    // make a hard copy of the array
+    // using the = operator specified in Board; this is allowed cause in place of a Board type a children type(here algo) can take his place
+    Board* tempBoard = this;
+    // we specify the code with which we mark visited positions
+    const int visitedPosition = 5;
+    // the walk sequence
+    return std::string();
+}
+
 
 
 #endif //ASTULL_EVOALGO_H
