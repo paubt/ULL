@@ -56,8 +56,8 @@ Board::~Board() {
 
 // print's the board        bruh
 void Board::printBoard() {
-    for(int i = 0; i < width; i++){
-        for(int j = 0; j < height; j++){
+    for(int i = 0; i < height; i++){
+        for(int j = 0; j < width; j++){
             std::cout << array[i][j] << " ";
         }
         std::cout << std::endl;
@@ -85,9 +85,9 @@ void Board::redistributeObstaclesRandom() {
         randomRow = distributionRow(generator);
         randomColumn = distributionColumn(generator);
         // if the point in the array is false (false == 0)
-        if ((array[randomRow][randomColumn]) == 0) {
+        if ((array[randomColumn][randomRow]) == 0) {
             // set the array point to 1 for obstacle and increment number of present obstacles by 1
-            array[randomRow][randomColumn] = 1;
+            array[randomColumn][randomRow] = 1;
             numberOfObstaclesPresent++;
         }
     // until we have added enough
@@ -109,9 +109,9 @@ void Board::redistributeObstaclesManually() {
 // goes through the whole board and sets all values to the argument past into the function
 void Board::setWholeBoardTo(int x) {
     // iterate through columns
-    for(int i = 0; i < width; i++){
+    for(int i = 0; i < height; i++){
         // iterate through rows
-        for(int j = 0; j < height; j++){
+        for(int j = 0; j < width; j++){
             // set value in specific row and column to x
             array[i][j] = x;
         }
@@ -135,8 +135,8 @@ void Board::copyBoard(const Board &other) {
     // we allocate a the new space for the board with new function
     allocateBoard();
     // now we copy the value's form the "other" grid to "this" grid
-    for(int i = 0; i < width; i++) {
-        for(int j = 0; j < height; j++) {
+    for(int i = 0; i < height; i++) {
+        for(int j = 0; j < width; j++) {
             array[i][j] = other.array[i][j];
         }
     }
@@ -145,9 +145,9 @@ void Board::copyBoard(const Board &other) {
 // allocate the space for the grid with new
 void Board::allocateBoard() {
     // dynamically allocating rows as list of list's
-    array = new int*[width];
+    array = new int*[height];
     // dynamically allocating a column for each row
-    for(int i = 0; i < width; i++) {
-        array[i] = new int[height];
+    for(int i = 0; i < height; i++) {
+        array[i] = new int[width];
     }
 }

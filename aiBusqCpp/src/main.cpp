@@ -7,9 +7,12 @@
 
 int main() {
     std::cout << "-------------test----MetaParameter--------------" << std::endl;
-    MetaParameter testMp(10, 10);
+    MetaParameter testMp(3, 6);
     std::cout << "-------------test----Board----------------------" << std::endl;
     Board testB(testMp, 0.2);
+    testB.printBoard();
+
+    testB.redistributeObstaclesRandom();
     /*
     std::cout << "-------------test---MetaParameter--------------" << std::endl;
     MetaParameter testMp(10, 10);

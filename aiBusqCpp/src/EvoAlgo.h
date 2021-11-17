@@ -138,7 +138,10 @@ std::string EvoAlgo<Individual>::randomWalk() {
     // we specify the code with which we mark visited positions
     const int visitedPosition = 5;
     // the walk sequence
-    return std::string();
+    // the current position height und width initialized with zero
+    int positionHeight, positionWidth = 0;
+
+    return nullptr;
 }
 
 
