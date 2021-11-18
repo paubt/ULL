@@ -8,6 +8,8 @@
 #include <string>
 #include <list>
 
+#include <thread>
+
 #include "Board.h"
 
 
@@ -28,7 +30,7 @@ public:
     int getSec() const;
     std::string getGenotype() const;
     double getFitness() const;
-    // functions to set string an fitness
+    // functions to set string and fitness
     void setGenotype(const std::string& newGenotype);
     void setFitness(double newFitness);
 };
@@ -79,7 +81,7 @@ template <class Individual>
 class EvoAlgo: public Board{
 public:
     // the population is a list with elements of the type individuals
-    std::list<Individual*> Population;
+    std::list<Individual*> population;
     // mu is the population size
     const int mu;
     // lambda is the parent size
@@ -105,21 +107,7 @@ public:
 template<class Individual>
 EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int searchTime): Board(board),
                              verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime) {
-    /*
-    Individual* pTempIndividual = new Individual;
-
-    Population.push_back(pTempIndividual);
-
-    for(auto it = Population.begin(); it != Population.end(); it++)
-        std::cout << (*it)->getMean() << std::endl;
-
-    Individual* pTemp = nullptr;
-
-    pTemp = Population.back();
-
-    std::cout << pTemp->getMean();
-    */
-
+    // fills the population list with lambda many individuals
     createInitialPopulation();
 }
 
@@ -128,8 +116,43 @@ template<class Individual>
 void EvoAlgo<Individual>::createInitialPopulation() {
     // found variable
     bool found = false;
-    //
-    std::vector<int> t = randomWalk(found,5,1);
+    // walk length
+    int walkLength = 0;
+    // walk time
+    int walkTime = 0;
+    // pointer to individual with a Individual just to extract the mean and standard deviation for the normal distribution and the walk time
+    Individual* pTempIndividual = new Individual;
+    // the normal distribution with the values of a individual
+    std::normal_distribution<float> nDistribution(pTempIndividual->getMean(), pTempIndividual->getStd());
+    // set the walk time
+    walkTime = pTempIndividual->getSec();
+    // now we delete the individual again
+    delete pTempIndividual;
+    pTempIndividual = nullptr;
+    // walk sequence as a vector of int and as string
+    std::vector<int> vecWalkSequence;
+    std::string stringWalkSequence;
+    // repeat until the start population is full
+    while (population.size() < lambda) {
+        // allocate a new Individual
+        pTempIndividual = new Individual;
+        // draw a random float length from the normal distribution and cast it to integer
+        walkLength = static_cast<int>(nDistribution(generator));
+        printBoard();
+        found = false;
+        vecWalkSequence = randomWalk(found, walkLength, walkTime);
+        // erase the last walk sequence from the string
+        stringWalkSequence.clear();
+        // transform the vector to a string
+        // iterate through the vector and append the content as char to the string
+        for (auto c: vecWalkSequence){
+            stringWalkSequence += std::to_string(c);
+        }
+        // insert the walk sequence as string into the genotype of the Individual (object)
+        pTempIndividual->setGenotype(stringWalkSequence);
+        // push the Individual into the population
+        population.push_back(pTempIndividual);
+    }
 }
 
 template<class Individual>
@@ -138,12 +161,12 @@ std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLeng
     found = false;
     // make a hard copy of the array
     // using the = operator specified in Board; this is allowed cause in place of a Board type a children type(here algo) can take his place
-    Board* tempBoard = this;
+    Board tempBoard = *this;
     // we specify the code with which we mark visited positions
     const int visitedPosition = 5;
     // the walk sequence
     // the current position height und width initialized with zero
-    int positionHeight, positionWidth = 0;
+    int positionHeight = 0, positionWidth = 0;
     // direction options
     std::vector<int> directionOptions;
     // the walk sequence
@@ -152,8 +175,7 @@ std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLeng
     int nextStepDirection;
     // calculate the max time it should take
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-    std::chrono::steady_clock::time_point
+    int timeDifference = 0;
     while (true) {
         // clear the directionsOptions
         directionOptions.clear();
@@ -163,107 +185,107 @@ std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLeng
         // check if it is free and not already visited
             // if so add it to possible direction options
         // south
-        if (positionHeight < tempBoard->height - 1) {
+        if (positionHeight < tempBoard.height - 1) {
             // check for goal
-            if (tempBoard->array[positionHeight + 1][positionWidth] == 3) {
+            if (tempBoard.array[positionHeight + 1][positionWidth] == 3) {
                 walkSequence.push_back(4);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight + 1][positionWidth] == 0) {
+            if (tempBoard.array[positionHeight + 1][positionWidth] == 0) {
                 directionOptions.push_back(4);
             }
         }
         // north
         if (positionHeight > 0) {
             // check for goal
-            if (tempBoard->array[positionHeight - 1][positionWidth] == 3) {
+            if (tempBoard.array[positionHeight - 1][positionWidth] == 3) {
                 walkSequence.push_back(0);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight - 1][positionWidth] == 0) {
+            if (tempBoard.array[positionHeight - 1][positionWidth] == 0) {
                 directionOptions.push_back(0);
             }
         }
         // east
-        if (positionWidth < tempBoard->width - 1) {
+        if (positionWidth < tempBoard.width - 1) {
             // check for goal
-            if (tempBoard->array[positionHeight][positionWidth + 1] == 3) {
+            if (tempBoard.array[positionHeight][positionWidth + 1] == 3) {
                 walkSequence.push_back(2);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight][positionWidth + 1] == 0) {
+            if (tempBoard.array[positionHeight][positionWidth + 1] == 0) {
                 directionOptions.push_back(2);
             }
         }
         // west
         if (positionWidth > 0) {
             // check for goal
-            if (tempBoard->array[positionHeight][positionWidth - 1] == 3) {
+            if (tempBoard.array[positionHeight][positionWidth - 1] == 3) {
                 walkSequence.push_back(6);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight][positionWidth - 1] == 0) {
+            if (tempBoard.array[positionHeight][positionWidth - 1] == 0) {
                 directionOptions.push_back(6);
             }
         }
         // northwest
         if ((positionWidth > 0) && (positionHeight >0)){
             // check for goal
-            if (tempBoard->array[positionHeight - 1][positionWidth - 1] == 3) {
+            if (tempBoard.array[positionHeight - 1][positionWidth - 1] == 3) {
                 walkSequence.push_back(7);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight - 1][positionWidth - 1] == 0) {
+            if (tempBoard.array[positionHeight - 1][positionWidth - 1] == 0) {
                 directionOptions.push_back(7);
             }
         }
         // northeast
-        if ((positionWidth < tempBoard->width - 1) && (positionHeight > 0)){
+        if ((positionWidth < tempBoard.width - 1) && (positionHeight > 0)){
             // check for goal
-            if (tempBoard->array[positionHeight - 1][positionWidth + 1] == 3) {
+            if (tempBoard.array[positionHeight - 1][positionWidth + 1] == 3) {
                 walkSequence.push_back(1);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight - 1][positionWidth + 1] == 0) {
+            if (tempBoard.array[positionHeight - 1][positionWidth + 1] == 0) {
                 directionOptions.push_back(1);
             }
 
         }
         // southwest
-        if ((positionWidth > 0) && (positionHeight < tempBoard->height - 1)){
+        if ((positionWidth > 0) && (positionHeight < tempBoard.height - 1)){
             // check for goal
-            if (tempBoard->array[positionHeight + 1][positionWidth - 1] == 3) {
+            if (tempBoard.array[positionHeight + 1][positionWidth - 1] == 3) {
                 walkSequence.push_back(5);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight + 1][positionWidth - 1] == 0) {
+            if (tempBoard.array[positionHeight + 1][positionWidth - 1] == 0) {
                 directionOptions.push_back(5);
             }
         }
         // southeast
-        if ((positionWidth < tempBoard->width - 1) && (positionHeight < tempBoard->height - 1)){
+        if ((positionWidth < tempBoard.width - 1) && (positionHeight < tempBoard.height - 1)){
             // check for goal
-            if (tempBoard->array[positionHeight + 1][positionWidth + 1] == 3) {
+            if (tempBoard.array[positionHeight + 1][positionWidth + 1] == 3) {
                 walkSequence.push_back(3);
                 found = true;
                 return walkSequence;
             }
             // check if it is free
-            if (tempBoard->array[positionHeight + 1][positionWidth + 1] == 0) {
+            if (tempBoard.array[positionHeight + 1][positionWidth + 1] == 0) {
                 directionOptions.push_back(3);
             }
         }
@@ -277,7 +299,7 @@ std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLeng
         // append the step direction to the walk sequence
         walkSequence.push_back(nextStepDirection);
         // mark the current place as visited by overwriting the position with 5
-        tempBoard->array[positionHeight][positionWidth] = visitedPosition;
+        tempBoard.array[positionHeight][positionWidth] = visitedPosition;
         // update the current position
         switch (nextStepDirection) {
             case 0:
@@ -314,11 +336,13 @@ std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLeng
                 found = false;
                 return walkSequence;
         }
-        // if the sequence reached the limit length given as input parameters it terminates the search
-        if (walkLength == walkSequence.size()) {
+
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        timeDifference = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        // if the sequence reached the limit length given as input parameters or run out of time it terminates the search
+        if ((walkLength == walkSequence.size()) && (timeDifference > walkTime)) {
             break;
         }
-
     }
     return walkSequence;
 }

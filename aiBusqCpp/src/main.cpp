@@ -1,5 +1,4 @@
 #include <iostream>
-#include <chrono>
 
 #include "MetaParameter.h"
 #include "Board.h"
@@ -7,38 +6,16 @@
 
 int main() {
     std::cout << "-------------test----MetaParameter--------------" << std::endl;
-    MetaParameter testMp(3, 6);
+    MetaParameter testMp(3, 5);
     std::cout << "-------------test----Board----------------------" << std::endl;
-    Board testB(testMp, 0.2);
-    std::cout << "lel" << std::endl;
-    testB.printBoard();
-
-    testB.redistributeObstaclesRandom();
-    /*
-    std::cout << "-------------test---MetaParameter--------------" << std::endl;
-    MetaParameter testMp(10, 10);
-    std::cout << testMp.getHeight();
-    std::cout << "-------------test----Board----------------------" << std::endl;
-
-    // time begin
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    Board testB(testMp, 0.2);
-    // time end
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    // print the board
-    testB.printBoard();
-    // calculate differance of begin and end and print it
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
-    */
+    Board testB(testMp, 0.1);
     std::cout << "-------------test----Individuals----------------" << std::endl;
-    StringIndividual<10, 14, 1> testIndi;
+    StringIndividual<10, 14, 1> testIndividual;
 
     std::cout << "-------------test----EvoAlgo--------------------" << std::endl;
-    EvoAlgo<StringIndividual<10, 5, 1>> testAlgo(testB, true, 10, 5, 2);
-
-
-
-
+    EvoAlgo<StringIndividual<10, 10, 1>> testAlgo(testB, true, 5, 10, 2);
+    for (auto it = testAlgo.population.begin(); it != testAlgo.population.end(); it++)
+        std::cout << (*it)->getGenotype() << std::endl;
 
     return 0;
-};
+}
