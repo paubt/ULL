@@ -13,7 +13,7 @@
 #include "Board.h"
 
 
-template<int Mean, int Std, int Sec>
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
 class StringIndividual {
 public:
     std::string genotype;
@@ -22,7 +22,21 @@ public:
     const int mean;
     const int std;
     const int sec;
-    // as
+    // the weighs for the fitness function all between 0-999
+    // chance for the  bit-flip/direction-flip mutation
+    const int chanceToBitFlip;
+    // chance for each bit-flip at the position
+    const int chanceEachBitFlip;
+    // chance for the insert and delete mutation
+    const int chanceTnInsertDelete;
+    // chance for the number of inserts
+    const int chanceInsert;
+    // chance for the number of deletes
+    const int chanceDelete;
+    // mean and standard deviation of the insert/delete pieces
+    const int meanInsertDelete;
+    const int stdInsertDelete;
+    // constructor
     StringIndividual();
     // getter function's // note these are const's
     int getMean() const;
@@ -35,43 +49,46 @@ public:
     void setFitness(double newFitness);
 };
 
-template<int Mean, int Std, int Sec>
-StringIndividual<Mean, Std, Sec>::StringIndividual(): mean(Mean), std(Std), sec(Sec){
+// chances (C in beginning) are 0-999
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::StringIndividual(): mean(Mean), std(Std),
+                sec(Sec), chanceToBitFlip(CTBF), chanceEachBitFlip(CEBF), chanceTnInsertDelete(CTID), chanceInsert(CI),
+                chanceDelete(CD), meanInsertDelete(MID), stdInsertDelete(StdID){
     genotype.clear();
 }
 
-template<int Mean, int Std, int Sec>
-int StringIndividual<Mean, Std, Sec>::getMean() const {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+int StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::getMean() const {
     return mean;
 }
 
-template<int Mean, int Std, int Sec>
-int StringIndividual<Mean, Std, Sec>::getStd() const {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+int StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::getStd() const {
     return std;
 }
 
-template<int Mean, int Std, int Sec>
-int StringIndividual<Mean, Std, Sec>::getSec() const {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+int StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::getSec() const {
     return sec;
 }
 
-template<int Mean, int Std, int Sec>
-std::string StringIndividual<Mean, Std, Sec>::getGenotype() const {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+std::string StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::getGenotype() const {
     return genotype;
 }
 
-template<int Mean, int Std, int Sec>
-double StringIndividual<Mean, Std, Sec>::getFitness() const {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+double StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::getFitness() const {
     return phenotype;
 }
 
-template<int Mean, int Std, int Sec>
-void StringIndividual<Mean, Std, Sec>::setGenotype(const std::string& newGenotype) {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+void StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::setGenotype(const std::string& newGenotype) {
     genotype = newGenotype;
 }
 
-template<int Mean, int Std, int Sec>
-void StringIndividual<Mean, Std, Sec>::setFitness(double newFitness) {
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+void StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::setFitness(double newFitness) {
     phenotype = newFitness;
 }
 
@@ -91,24 +108,46 @@ public:
     const bool verbose;
     // time to search in seconds
     const int searchTime;
-    // function so create a new individual
-    // std::string createNewIndividual(int mean, );
+    // weights for the fitness function
+    const float weightDistance;
+    const float weightLengthOfGenotype;
+
 public:
     EvoAlgo(Board &board, bool verbose,int mu, int lambda,
               // the time the algorithm will search
-              int searchTime);
+              int searchTime, float weightDistance, float weightLenghtOfGenotype);
+    // private helper functions
+private:
     // allocates n new Individuals and push's them into the population list doing a random walk for each;
     void createInitialPopulation();
     // determine the walk length and performs a walk returning the encoded sequence as a string (see README for explanation)
     std::vector<int> randomWalk(bool &found, const int walkLength, const int walkTime);
-    //
+    //position after n Steps returned as reference
+    void findPositionAfterNSteps(Individual* individual, int nStepsToTake, int& positionHeight, int& positionWidth);
+    // check if a walk sequence of an individual goes out of the grid or over an obstacle or a visited place return false if so
+    bool checkIfLegalWalk(Individual* individual);
+    // calculate the manhattan distance / taxi cab distance
+    int manhattanDistance(int height, int width, int maxHeight, int maxWidth);
+    // uses length, the distance of the end and the fact that it found the goal to calculate the fitness
+    // and then saves it inside the individual
+    void assesFitness(Individual* individual);
+    // updates/asses all the fitness's of all individuals inside the population
+    void assesAllFitnessInPopulation();
+    // bit flip / direction flip function
+public:
+    void bitFlipMutation(Individual* individual);
+
+
 };
 
 template<class Individual>
-EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int searchTime): Board(board),
-                             verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime) {
+EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int searchTime,
+                             float weightDistance, float weightLengthOfGenotype):
+                             Board(board), verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime),
+                             weightDistance(weightDistance), weightLengthOfGenotype(weightLengthOfGenotype){
     // fills the population list with lambda many individuals
     createInitialPopulation();
+    assesAllFitnessInPopulation();
 }
 
 
@@ -138,7 +177,6 @@ void EvoAlgo<Individual>::createInitialPopulation() {
         pTempIndividual = new Individual;
         // draw a random float length from the normal distribution and cast it to integer
         walkLength = static_cast<int>(nDistribution(generator));
-        printBoard();
         found = false;
         vecWalkSequence = randomWalk(found, walkLength, walkTime);
         // erase the last walk sequence from the string
@@ -347,6 +385,183 @@ std::vector<int> EvoAlgo<Individual>::randomWalk(bool &found, const int walkLeng
     return walkSequence;
 }
 
+template<class Individual>
+void EvoAlgo<Individual>::findPositionAfterNSteps(Individual *individual, int nStepsToTake, int &positionHeight,
+                                                  int &positionWidth) {
+    // set the references past as arguments to zero
+    positionHeight = 0;
+    positionWidth = 0;
+    // extract the genotype out of the individual as walk sequence string
+    std::string walkSequence = individual->getGenotype();
+    // temporal holder for the direction
+    int tempDirection = 0;
+    // assert if the input of the steps to take is in an undefined range
+    assert(nStepsToTake > 0);
+    // if the Steps to take are larger than the individual length
+
+    // repeat for the specified n steps or until the walk sequence is empty (end of sequence)
+    while ((nStepsToTake-- > 0) && (!walkSequence.empty())) {
+        // read the first character from the walk sequence and rest 48 to get from ascii to normal value
+        tempDirection = walkSequence[0] -48;
+        // delete the first element from the walk sequence
+        walkSequence.erase(0,1);
+        // increase the positions based on the direction
+        switch (tempDirection) {
+            case 0:
+                --positionHeight;
+                break;
+            case 1:
+                --positionHeight;
+                ++positionWidth;
+                break;
+            case 2:
+                ++positionWidth;
+                break;
+            case 3:
+                ++positionHeight;
+                ++positionWidth;
+                break;
+            case 4:
+                ++positionHeight;
+                break;
+            case 5:
+                ++positionHeight;
+                --positionWidth;
+                break;
+            case 6:
+                --positionWidth;
+                break;
+            case 7:
+                --positionHeight;
+                --positionWidth;
+            default:
+                std::cout << "there is a masiv error in the genotype/ unexpected value detected in switch of findPositionAfterNSteps " << std::endl;
+                break;
+        }
+    }
+
+}
+
+template<class Individual>
+bool EvoAlgo<Individual>::checkIfLegalWalk(Individual *individual) {
+    // make a hard copy of the array
+    // using the = operator specified in Board; this is allowed cause in place of a Board type a children type(here algo) can take his place
+    Board tempBoard = *this;
+    // we specify the code with which we mark visited positions
+    const int visitedPosition = 5;
+    // the current position height und width initialized with zero
+    int positionHeight = 0, positionWidth = 0;
+    // do a pre-check to see if the start position is a obstacle
+
+    // main check loop allying the steps and assuring correctness
+    for(int i = 0; i < (individual->getGenotype()).size(); i++){
+        // set the current position as visited
+        tempBoard.array[positionHeight][positionWidth] = visitedPosition;
+        // read out the character out of the genotype in position i and with minus 48 go from ascii to decimal
+        // increment the position's based on the direction in the string
+        switch (individual->getGenotype()[i] - 48) {
+            case 0:
+                --positionHeight;
+                break;
+            case 1:
+                --positionHeight;
+                ++positionWidth;
+                break;
+            case 2:
+                ++positionWidth;
+                break;
+            case 3:
+                ++positionHeight;
+                ++positionWidth;
+                break;
+            case 4:
+                ++positionHeight;
+                break;
+            case 5:
+                ++positionHeight;
+                --positionWidth;
+                break;
+            case 6:
+                --positionWidth;
+                break;
+            case 7:
+                --positionHeight;
+                --positionWidth;
+            default:
+                std::cout << "there is a masiv error in the genotype/ unexpected value detected in switch of findPositionAfterNSteps " << std::endl;
+                break;
+        }
+        // check if out of grid
+        if ((positionHeight < 0) || (positionHeight >= getHeight()) || (positionWidth < 0) || (positionWidth >= getWidth())) {
+            return false;
+        }
+        // check if on top of a obstacle or an already visited place
+        if ((tempBoard.array[positionHeight][positionWidth] == 5) || (tempBoard.array[positionHeight][positionWidth] == 1)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<class Individual>
+int EvoAlgo<Individual>::manhattanDistance(int height, int width, int maxHeight, int maxWidth) {
+    // make sure that height is in range: 0 <= height < maxHeight
+    assert(height >= 0);
+    assert(height < maxHeight);
+    // make sure that width is in range: 0 <= width < maxWidth
+    assert(width >= 0);
+    assert(width < maxWidth);
+    // calculate the distance and return it
+    return abs(maxHeight - height) + abs(maxWidth - maxWidth);
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::assesFitness(Individual *individual) {
+    // get the length of the genotype
+    int genotypeLength = (individual->getGenotype()).size();
+    // variable for the end positions
+    int endPositionHeight = 0;
+    int endPositionWidth = 0;
+    // calculate the end positions
+    findPositionAfterNSteps(individual, genotypeLength, endPositionHeight, endPositionWidth);
+    // use the end position's to calculate the Manhattan distance
+    int manhattanD = manhattanDistance(endPositionHeight, endPositionWidth, getHeight(), getWidth());
+    // if the manhattan distance != 0, meaning the individual doesn't end at the goal, it gets extra penalized
+    bool extraPenalty = false;
+    if (manhattanD != 0) {
+        extraPenalty = true;
+    }
+    // calculate the fitness
+    double fitness = static_cast<float>(extraPenalty * 50) + (weightDistance * static_cast<float>(manhattanD)) +
+            (weightLengthOfGenotype * static_cast<float>(genotypeLength));
+    // update the fitness in the individual
+    individual->setFitness(fitness);
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::assesAllFitnessInPopulation() {
+    // iterate through the population
+    for (auto it = population.begin(); it != population.end(); it++) {
+        // call the fitness asses function which updates the fitness
+        assesFitness(*it);
+    }
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::bitFlipMutation(Individual *individual) {
+    // the genotype
+    std::string genotype = individual->getGenotype();
+    // iterate though the individuals genotype
+    for (int i = 0; i < (individual->getGenotype()).size(); i++) {
+        if (individual->chanceEachBitFlip > (rand() % 1000)) {
+            // a random number between 0 and 7
+            // then we add 48 to get the ascii encoding and typecast to char
+            genotype[i] = static_cast<char>((rand() % 8) + 48);
+        }
+    }
+    // set the new genotype into the individual
+    individual->setGenotype(genotype);
+}
 
 
 #endif //ASTULL_EVOALGO_H
