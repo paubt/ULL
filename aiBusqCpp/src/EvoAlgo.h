@@ -137,6 +137,8 @@ private:
 public:
     void bitFlipMutation(Individual* individual);
     void insertDeleteMutation(Individual* individual);
+    void mutateIndividual(Individual* individual);
+    void mutatePopulation();
 
 
 };
@@ -609,12 +611,32 @@ void EvoAlgo<Individual>::insertDeleteMutation(Individual *individual) {
         deleteIndex = rand() & (genotype.size() - deleteLength);
         // erase the deleteLength starting from deleteIndex
         genotype.erase(deleteIndex, deleteLength);
-        std::cout << genotype << std::endl;
         // draw new random number
         random = rand() % 1000;
     }
     // update the genotype in the individual
     individual->setGenotype(genotype);
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::mutateIndividual(Individual *individual) {
+    //determine if we apply the bit-flip mutation
+    if (individual->chanceToBitFlip > (rand() % 1000)) {
+        // call the bit-flip mutation
+        bitFlipMutation(individual);
+    }
+    // determine if we apply the insert-delete mutation
+    if (individual->chanceToInsertDelete > (rand() % 1000)) {
+        insertDeleteMutation(individual);
+    }
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::mutatePopulation() {
+    // iterate through the population
+    for (auto it = population.begin(); it != population.end(); it++) {
+        mutateIndividual(*it);
+    }
 }
 
 
