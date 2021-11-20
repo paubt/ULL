@@ -28,7 +28,7 @@ public:
     // chance for each bit-flip at the position
     const int chanceEachBitFlip;
     // chance for the insert and delete mutation
-    const int chanceTnInsertDelete;
+    const int chanceToInsertDelete;
     // chance for the number of inserts
     const int chanceInsert;
     // chance for the number of deletes
@@ -52,7 +52,7 @@ public:
 // chances (C in beginning) are 0-999
 template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
 StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::StringIndividual(): mean(Mean), std(Std),
-                sec(Sec), chanceToBitFlip(CTBF), chanceEachBitFlip(CEBF), chanceTnInsertDelete(CTID), chanceInsert(CI),
+                sec(Sec), chanceToBitFlip(CTBF), chanceEachBitFlip(CEBF), chanceToInsertDelete(CTID), chanceInsert(CI),
                 chanceDelete(CD), meanInsertDelete(MID), stdInsertDelete(StdID){
     genotype.clear();
 }
@@ -136,6 +136,7 @@ private:
     // bit flip / direction flip function
 public:
     void bitFlipMutation(Individual* individual);
+    void insertDeleteMutation(Individual* individual);
 
 
 };
@@ -560,6 +561,59 @@ void EvoAlgo<Individual>::bitFlipMutation(Individual *individual) {
         }
     }
     // set the new genotype into the individual
+    individual->setGenotype(genotype);
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::insertDeleteMutation(Individual *individual) {
+    // get the genotype
+    std::string genotype = individual->getGenotype();
+    // normal distribution for the length of the insert/delete pieces
+    std::normal_distribution<float> nDistribution(individual->meanInsertDelete, individual->stdInsertDelete);
+    // variables
+    int insertIndex = 0;
+    int insertLength = 0;
+    int deleteLength = 0;
+    int deleteIndex = 0;
+    std::string insertString;
+    // the random number;
+    int random = rand() % 1000;
+    // insert loop
+    // loop check if chance is larger than the random number
+    while(individual->chanceInsert > random) {
+        // determines the position where to insert
+        insertIndex = rand() % (genotype.size() + 1);
+        // determines the length of the piece to insert
+        insertLength = static_cast<int>(nDistribution(generator));
+        // create the insertString
+        insertString.clear();
+        for (int i = 0; i < insertLength; i++) {
+            // append a random direction to the insertString
+            insertString += static_cast<char>((rand() % 8) + 48);
+        }
+        // insert the input string into the genotype
+        genotype.insert(insertIndex,insertString);
+        // draw a new random number
+        random = rand() % 1000;
+    }
+    random = rand() % 1000;
+    // delete loop
+    while (individual->chanceDelete > random) {
+        // determine the delete length
+        deleteLength = static_cast<int>(nDistribution(generator));
+        // break if delete length is longer than the genotype length
+        if (deleteLength >= genotype.size()) {
+            break;
+        }
+        // determine where the delete-position to start
+        deleteIndex = rand() & (genotype.size() - deleteLength);
+        // erase the deleteLength starting from deleteIndex
+        genotype.erase(deleteIndex, deleteLength);
+        std::cout << genotype << std::endl;
+        // draw new random number
+        random = rand() % 1000;
+    }
+    // update the genotype in the individual
     individual->setGenotype(genotype);
 }
 
