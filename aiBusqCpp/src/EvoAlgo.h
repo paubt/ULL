@@ -38,6 +38,8 @@ public:
     const int stdInsertDelete;
     // constructor
     StringIndividual();
+    // destructor
+    ~StringIndividual();
     // getter function's // note these are const's
     int getMean() const;
     int getStd() const;
@@ -92,6 +94,12 @@ void StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::set
     phenotype = newFitness;
 }
 
+template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
+StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::~StringIndividual() {
+    std::cout << "lle called the destructor" << std::endl;
+    phenotype = 0;
+}
+
 
 // class template that takes as template parameters a class individual's
 template <class Individual>
@@ -116,6 +124,11 @@ public:
     EvoAlgo(Board &board, bool verbose,int mu, int lambda,
               // the time the algorithm will search
               int searchTime, float weightDistance, float weightLenghtOfGenotype);
+    // the main muCommaLambda loop
+    void muCommaLambda();
+    // the main muPlusLambda loop
+    void muPlusLambda(int maxGenerations);
+
     // private helper functions
 private:
     // allocates n new Individuals and push's them into the population list doing a random walk for each;
@@ -134,13 +147,16 @@ private:
     // updates/asses all the fitness's of all individuals inside the population
     void assesAllFitnessInPopulation();
     // bit flip / direction flip function
-public:
     void bitFlipMutation(Individual* individual);
+    // delete-insert mutation
     void insertDeleteMutation(Individual* individual);
+    // individual mutation
     void mutateIndividual(Individual* individual);
+    // mutate the whole population
     void mutatePopulation();
-
-
+    // find the best individual, based on fitness, and save its characteristics into the
+    // return ture if i an new best is found
+    bool checkForBest(std::string &bestGenotype, double &bestFitness);
 };
 
 template<class Individual>
@@ -148,9 +164,6 @@ EvoAlgo<Individual>::EvoAlgo(Board &board, bool verbose, int mu, int lambda, int
                              float weightDistance, float weightLengthOfGenotype):
                              Board(board), verbose(verbose), mu(mu), lambda(lambda), searchTime(searchTime),
                              weightDistance(weightDistance), weightLengthOfGenotype(weightLengthOfGenotype){
-    // fills the population list with lambda many individuals
-    createInitialPopulation();
-    assesAllFitnessInPopulation();
 }
 
 
@@ -175,7 +188,7 @@ void EvoAlgo<Individual>::createInitialPopulation() {
     std::vector<int> vecWalkSequence;
     std::string stringWalkSequence;
     // repeat until the start population is full
-    while (population.size() < lambda) {
+    while (population.size() < mu) {
         // allocate a new Individual
         pTempIndividual = new Individual;
         // draw a random float length from the normal distribution and cast it to integer
@@ -437,8 +450,9 @@ void EvoAlgo<Individual>::findPositionAfterNSteps(Individual *individual, int nS
             case 7:
                 --positionHeight;
                 --positionWidth;
+                break;
             default:
-                std::cout << "there is a masiv error in the genotype/ unexpected value detected in switch of findPositionAfterNSteps " << std::endl;
+                std::cout << tempDirection << "there is a masiv error in the genotype/ unexpected value detected in switch of findPositionAfterNSteps " << std::endl;
                 break;
         }
     }
@@ -490,8 +504,9 @@ bool EvoAlgo<Individual>::checkIfLegalWalk(Individual *individual) {
             case 7:
                 --positionHeight;
                 --positionWidth;
+                break;
             default:
-                std::cout << "there is a masiv error in the genotype/ unexpected value detected in switch of findPositionAfterNSteps " << std::endl;
+                std::cout << individual->getGenotype()[i] - 48 <<  " there is a massive error in the genotype/ unexpected value detected in switch of checkIfLegalWalk " << std::endl;
                 break;
         }
         // check if out of grid
@@ -637,6 +652,108 @@ void EvoAlgo<Individual>::mutatePopulation() {
     for (auto it = population.begin(); it != population.end(); it++) {
         mutateIndividual(*it);
     }
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::muCommaLambda() {
+
+}
+
+template<class Individual>
+void EvoAlgo<Individual>::muPlusLambda(int maxGenerations) {
+    // the current generation
+    int generation = 0;
+    // the parent list
+    std::list<Individual*> parents;
+    // stuff for sort : temp parent, currentBest,
+    int index = 0;
+    int currentBestIndex = 0;
+    double currentBestFitness = 0;
+    Individual* pCurrentBestIndividual = nullptr;
+    Individual* pTempIndividual = nullptr;
+    // create a initial population
+    createInitialPopulation();
+    // the fitness and genotype of the best individual
+    double bestFitness = DBL_MAX;
+    std::string bestGenotype;
+    bool newBestFound = false;
+
+    // start time
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    // difference counted in seconds
+    long timeDifference = 0;
+
+    // main generation loop
+    do {
+        //asses the fitness of the population
+        assesAllFitnessInPopulation();
+        // check for new best
+        newBestFound = checkForBest(bestGenotype, bestFitness);
+        if (newBestFound && verbose) {
+            std::cout << "new best in generation: " << generation << std::endl;
+            newBestFound = false;
+        }
+        // print the population
+        for (auto it = population.begin(); it != population.end(); it++) {
+            std::cout << (*it)->getFitness() << std::endl;
+        }
+        std::cout << std::endl;
+        // try to sort
+        //
+        // pass the lambda's best Individuals as pointers to the parent population and then delete the pointer in the
+        // population. Then we delete the rest of the Individuals.
+        for (int i = 0; i < lambda; i++) {
+            index = 0;
+            currentBestFitness = DBL_MAX ;
+            // iterate through the remaining population
+            for (auto it = population.begin(); it != population.end(); it++) {
+                // if a new best is found save it
+                if ((*it)->getFitness() < currentBestFitness) {
+                    currentBestFitness = (*it)->getFitness();
+                    pCurrentBestIndividual = *it;
+                }
+            }
+            // copy the best one found to the parent population
+            parents.push_back(pCurrentBestIndividual);
+            // delete the best form the population
+            population.remove(pCurrentBestIndividual);
+        }
+
+        // print the parents
+        for (auto it = parents.begin(); it != parents.end(); it++) {
+            std::cout << (*it)->getFitness() << std::endl;
+        }
+        std::cout << std::endl;
+        // print the population
+        std::cout << "pop size:" << population.size() << std::endl;
+        for (auto it = population.begin(); it != population.end(); it++) {
+            std::cout << (*it)->getFitness() << std::endl;
+        }
+
+
+        // increment generation
+        ++generation;
+        // calculate difference from start to end
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        timeDifference = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+        std::cout << timeDifference << std::endl;
+        // stop if difference in time is larger than allowed or the maxGeneration is hit
+    } while ((searchTime > timeDifference) && (generation < maxGenerations));
+
+}
+
+template<class Individual>
+bool EvoAlgo<Individual>::checkForBest(std::string &bestGenotype, double &bestFitness) {
+    bool newBest = false;
+    // iterate through the population
+    for (auto it = population.begin(); it != population.end(); it++) {
+        if ((*it)->getFitness() > bestFitness) {
+            bestFitness = (*it)->getFitness();
+            bestGenotype = (*it)->getGenotype();
+            newBest = true;
+        }
+    }
+    return newBest;
 }
 
 

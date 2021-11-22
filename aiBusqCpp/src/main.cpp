@@ -15,17 +15,11 @@ int main() {
     std::cout << "-------------test----EvoAlgo--------------------" << std::endl;
 
 
-    EvoAlgo<StringIndividual<10,10, 1,500,100,500,300,150,3,1>> testAlgo(testB, true, 5, 10, 2,
+    EvoAlgo<StringIndividual<10,10, 1,500,100,500,300,150,3,1>> testAlgo(testB, true, 10, 5, 1,
                                                   1, 1);
     testAlgo.printBoard();
 
-    for (auto it = testAlgo.population.begin(); it != testAlgo.population.end(); it++) {
-        std::cout << "genotype: " << (*it)->getGenotype() << " has fitness  " << (*it)->getFitness() << std::endl;
-    }
-    testAlgo.mutatePopulation();
-    for (auto it = testAlgo.population.begin(); it != testAlgo.population.end(); it++) {
-        std::cout << "genotype: " << (*it)->getGenotype() << " has fitness  " << (*it)->getFitness() << std::endl;
-    }
+    testAlgo.muPlusLambda(1);
 
     return 0;
 }

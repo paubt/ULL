@@ -8,7 +8,7 @@
 #include "random"
 #include <cassert>
 #include <chrono>
-
+#include <cfloat>
 
 
 class MetaParameter {
