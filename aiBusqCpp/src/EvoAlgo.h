@@ -38,8 +38,6 @@ public:
     const int stdInsertDelete;
     // constructor
     StringIndividual();
-    // destructor
-    ~StringIndividual();
     // getter function's // note these are const's
     int getMean() const;
     int getStd() const;
@@ -94,11 +92,7 @@ void StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::set
     phenotype = newFitness;
 }
 
-template<int Mean, int Std, int Sec, int CTBF, int CEBF, int CTID, int CI, int CD, int MID, int StdID>
-StringIndividual<Mean, Std, Sec, CTBF, CEBF, CTID, CI, CD, MID, StdID>::~StringIndividual() {
-    std::cout << "lle called the destructor" << std::endl;
-    phenotype = 0;
-}
+
 
 
 // class template that takes as template parameters a class individual's
@@ -155,7 +149,7 @@ private:
     // mutate the whole population
     void mutatePopulation();
     // find the best individual, based on fitness, and save its characteristics into the
-    // return ture if i an new best is found
+    // return ture if a new best is found
     bool checkForBest(std::string &bestGenotype, double &bestFitness);
 };
 
@@ -671,6 +665,7 @@ void EvoAlgo<Individual>::muPlusLambda(int maxGenerations) {
     double currentBestFitness = 0;
     Individual* pCurrentBestIndividual = nullptr;
     Individual* pTempIndividual = nullptr;
+    Individual* pMutateIndividual = nullptr;
     // create a initial population
     createInitialPopulation();
     // the fitness and genotype of the best individual
@@ -693,11 +688,8 @@ void EvoAlgo<Individual>::muPlusLambda(int maxGenerations) {
             std::cout << "new best in generation: " << generation << std::endl;
             newBestFound = false;
         }
-        // print the population
-        for (auto it = population.begin(); it != population.end(); it++) {
-            std::cout << (*it)->getFitness() << std::endl;
-        }
-        std::cout << std::endl;
+        // first clear parents list
+        parents.clear();
         // try to sort
         //
         // pass the lambda's best Individuals as pointers to the parent population and then delete the pointer in the
@@ -718,19 +710,46 @@ void EvoAlgo<Individual>::muPlusLambda(int maxGenerations) {
             // delete the best form the population
             population.remove(pCurrentBestIndividual);
         }
-
-        // print the parents
+        // clear the population of the individuals that to bad
+        population.clear();
+        // iterate through the parent list
         for (auto it = parents.begin(); it != parents.end(); it++) {
-            std::cout << (*it)->getFitness() << std::endl;
-        }
-        std::cout << std::endl;
-        // print the population
-        std::cout << "pop size:" << population.size() << std::endl;
-        for (auto it = population.begin(); it != population.end(); it++) {
-            std::cout << (*it)->getFitness() << std::endl;
-        }
+            // add the parent automatically to the next generation
+            pTempIndividual = *it;
+            population.push_back(pTempIndividual);
+            // do for each parent mu/lambda times :
+            for (int i = 0; i < mu/lambda; i++) {
+                // create a new individual and get the genotype
+                pMutateIndividual = new Individual;
+                pMutateIndividual->setGenotype(pTempIndividual->getGenotype());
+                for(int j = 0; i < 10; j++) {
+                    // do the mutation
+                    mutateIndividual(pMutateIndividual);
+                    // check if a legal walk -> break for loop
+                    if (checkIfLegalWalk(pMutateIndividual)) {
+                        break;
+                    // else if end of loop set genotype again to the parents one and break
+                    } else if (i == 9) {
+                        pMutateIndividual->setGenotype(pTempIndividual->getGenotype());
+                        break;
+                    }
+                }
+                population.push_back(pMutateIndividual);
 
 
+            }
+
+        }
+        // clear parent
+        // if verbose true print some info's
+        if (verbose) {
+            std::cout << "Generation: " << generation << std::endl;
+            // print the population
+            index = 0;
+            for (auto it = population.begin(); it != population.end(); it++) {
+                std::cout << index++ << " - " << (*it)->getGenotype() << std::endl;
+            }
+        }
         // increment generation
         ++generation;
         // calculate difference from start to end

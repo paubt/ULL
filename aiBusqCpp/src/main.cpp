@@ -15,11 +15,11 @@ int main() {
     std::cout << "-------------test----EvoAlgo--------------------" << std::endl;
 
 
-    EvoAlgo<StringIndividual<10,10, 1,500,100,500,300,150,3,1>> testAlgo(testB, true, 10, 5, 1,
+    EvoAlgo<StringIndividual<10,10, 1,500,100,500,300,150,3,1>> testAlgo(testB, true, 10, 5, 100,
                                                   1, 1);
     testAlgo.printBoard();
 
-    testAlgo.muPlusLambda(1);
+    testAlgo.muPlusLambda(100);
 
     return 0;
 }
